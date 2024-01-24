@@ -63,22 +63,11 @@ func (g *NotifyService) Notify(param notifier.ParamExec) (int, error) { //nolint
 		return result.ExitCode, err
 	}
 
-	_, isApply := parser.(*terraform.ApplyParser)
-	if isApply {
-		if !cfg.MR.IsNumber() {
-			commits, err := g.client.Commits.List(cfg.MR.Revision)
-			if err != nil {
-				return result.ExitCode, err
-			}
-			lastRevision, _ := g.client.Commits.lastOne(commits, cfg.MR.Revision)
-			cfg.MR.Revision = lastRevision
-		}
-	}
-
 	logE := logrus.WithFields(logrus.Fields{
 		"program": "tfcmt",
 	})
 
+	_, isApply := parser.(*terraform.ApplyParser)
 	if !isApply && cfg.Patch && cfg.MR.Number != 0 {
 		logE.Debug("try patching")
 		// If fail to list comments, try to create new post.
